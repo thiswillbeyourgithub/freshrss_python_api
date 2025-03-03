@@ -5,7 +5,7 @@ with open("README.md", "r") as readme:
 
 setup(
     name="freshrss_api",
-    version="1.0.0",
+    version="1.0.1",
     description="Easy to use python api to get data from FreshRSS",
     long_description=long_description,
     long_description_content_type="text/markdown",
