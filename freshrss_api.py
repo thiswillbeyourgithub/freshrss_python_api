@@ -100,18 +100,18 @@ class FreshRSSAPI:
             raise APIError(f"Failed to parse API response: {str(e)}")
 
 
-    def set_mark(self, as: Literal["read", "unread"], id: Union[str, int]) -> Dict[str, Any]:
+    def set_mark(self, as_: Literal["read", "unread"], id: Union[str, int]) -> Dict[str, Any]:
         """
         Mark an item as read or unread.
 
         Args:
-            as: Status to set ('read' or 'unread')
+            as_: Status to set ('read' or 'unread')
             id: ID of the item to mark
 
         Returns:
             Dict containing the API response
         """
-        return self._call("mark", as_=as, id=str(id))
+        return self._call("mark", as_=as_, id=str(id))
 
     def _dict_to_item(self, item_dict: Dict[str, Any]) -> Item:
         """Convert a dictionary to an Item object."""
