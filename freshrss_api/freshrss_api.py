@@ -1,5 +1,6 @@
 from datetime import datetime
 import hashlib
+import os
 import random
 import requests
 import time
@@ -23,7 +24,13 @@ class FreshRSSAPI:
     """A Python client for the FreshRSS Fever API."""
     VERSION: str = "1.0.0"
 
-    def __init__(self, host: str, username: str, password: str, verify_ssl: bool = True):
+    def __init__(
+        self, 
+        host: str = None, 
+        username: str = None, 
+        password: str = None, 
+        verify_ssl: bool = True
+    ):
         """
         Initialize the FreshRSS API client.
 
@@ -34,11 +41,32 @@ class FreshRSSAPI:
         
         Args:
             host: Base URL of FreshRSS instance (e.g., 'https://freshrss.example.net')
+                 Defaults to FRESHRSS_PYTHON_API_HOST environment variable if not provided
             username: FreshRSS username
+                     Defaults to FRESHRSS_PYTHON_API_USERNAME environment variable if not provided
             password: FreshRSS API password
+                     Defaults to FRESHRSS_PYTHON_API_PASSWORD environment variable if not provided
             verify_ssl: Whether to verify SSL certificates (default: True)
+                       Can be overridden with FRESHRSS_PYTHON_API_VERIFY_SSL environment variable
         """
-        self.host = host.rstrip('/')
+        # Get values from environment variables if not provided
+        self.host = host or os.environ.get('FRESHRSS_PYTHON_API_HOST')
+        username = username or os.environ.get('FRESHRSS_PYTHON_API_USERNAME')
+        password = password or os.environ.get('FRESHRSS_PYTHON_API_PASSWORD')
+        
+        # Check for required values
+        if not self.host:
+            raise ValueError("Host URL is required. Provide it as an argument or set FRESHRSS_PYTHON_API_HOST environment variable.")
+        if not username:
+            raise ValueError("Username is required. Provide it as an argument or set FRESHRSS_PYTHON_API_USERNAME environment variable.")
+        if not password:
+            raise ValueError("Password is required. Provide it as an argument or set FRESHRSS_PYTHON_API_PASSWORD environment variable.")
+        
+        # Check if verify_ssl is set in environment
+        env_verify_ssl = os.environ.get('FRESHRSS_PYTHON_API_VERIFY_SSL')
+        if env_verify_ssl is not None:
+            verify_ssl = env_verify_ssl.lower() in ('true', '1', 'yes')
+        self.host = self.host.rstrip('/')
         self.api_endpoint = urljoin(f"{self.host}/api/", "fever.php")
         self.verify_ssl = verify_ssl
         
