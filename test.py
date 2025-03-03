@@ -1,27 +1,60 @@
+import os
 from freshrss_api import FreshRSSAPI
 import fire
 
-def freshrss_client(
-    host: str,
-    username: str,
-    password: str,
-    verify_ssl=False,
+def get_freshrss_client(
+    host: str = None,
+    username: str = None,
+    password: str = None,
+    verify_ssl: bool = False,
 ):
     """
-    FreshRSS API client.
+    Create a FreshRSS API client using provided credentials or environment variables.
     
     Args:
-        host: FreshRSS host URL
-        username: FreshRSS username
-        password: FreshRSS password
+        host: FreshRSS host URL (defaults to PYTEST_FRESHRSS_PYTHON_API_HOST env var)
+        username: FreshRSS username (defaults to PYTEST_FRESHRSS_PYTHON_API_USERNAME env var)
+        password: FreshRSS password (defaults to PYTEST_FRESHRSS_PYTHON_API_PASSWORD env var)
         verify_ssl: Whether to verify SSL certificates
+        
+    Returns:
+        FreshRSSAPI instance
     """
-    inst = FreshRSSAPI(
+    # Use provided values or fall back to environment variables
+    host = host or os.environ.get('PYTEST_FRESHRSS_PYTHON_API_HOST')
+    username = username or os.environ.get('PYTEST_FRESHRSS_PYTHON_API_USERNAME')
+    password = password or os.environ.get('PYTEST_FRESHRSS_PYTHON_API_PASSWORD')
+    
+    if not all([host, username, password]):
+        missing = []
+        if not host: missing.append("host")
+        if not username: missing.append("username")
+        if not password: missing.append("password")
+        raise ValueError(f"Missing required credentials: {', '.join(missing)}")
+    
+    return FreshRSSAPI(
         host=host,
         username=username,
         password=password,
         verify_ssl=verify_ssl,
     )
+
+def freshrss_client(
+    host: str = None,
+    username: str = None,
+    password: str = None,
+    verify_ssl: bool = False,
+):
+    """
+    FreshRSS API client demo.
+    
+    Args:
+        host: FreshRSS host URL (defaults to PYTEST_FRESHRSS_PYTHON_API_HOST env var)
+        username: FreshRSS username (defaults to PYTEST_FRESHRSS_PYTHON_API_USERNAME env var)
+        password: FreshRSS password (defaults to PYTEST_FRESHRSS_PYTHON_API_PASSWORD env var)
+        verify_ssl: Whether to verify SSL certificates
+    """
+    inst = get_freshrss_client(host, username, password, verify_ssl)
 
     print(f"{len(inst.get_feeds())} feeds")
 
