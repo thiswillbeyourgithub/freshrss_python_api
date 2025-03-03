@@ -7,11 +7,12 @@ A Python client for interacting with the FreshRSS Fever API. This library provid
 
 ## Features
 
-- **Authentication**: Securely authenticate with your FreshRSS instance using your username and API password.
+- **Authentication**: Securely authenticate with your FreshRSS instance using your username and API password or environment variables.
 - **Item Management**: Fetch all items, unread items, or saved items. Mark items as read or unread.
 - **Feeds & Groups**: Retrieve all feeds and groups (categories) from your FreshRSS instance.
 - **Pagination**: Efficiently fetch large numbers of items with pagination and customizable timeouts.
 - **Type Safety**: Optional type checking with `beartype` for improved code reliability.
+- **Environment Variables**: Configure the client using environment variables for easier integration with CI/CD pipelines and containerized environments.
 
 ## Installation
 
@@ -23,6 +24,17 @@ pip install freshrss-api
 
 ## Usage
 
+### Environment Variables
+
+The FreshRSS API client supports the following environment variables:
+
+- `FRESHRSS_PYTHON_API_HOST`: Your FreshRSS instance URL (e.g., "https://freshrss.example.net")
+- `FRESHRSS_PYTHON_API_USERNAME`: Your FreshRSS username
+- `FRESHRSS_PYTHON_API_PASSWORD`: Your FreshRSS API password
+- `FRESHRSS_PYTHON_API_VERIFY_SSL`: Whether to verify SSL certificates ("true", "1", "yes" for True, anything else for False)
+
+These environment variables can be used instead of passing parameters directly to the constructor.
+
 ### Initialization
 
 To start using the FreshRSS API client, initialize it with your FreshRSS instance URL, username, and API password.
@@ -30,12 +42,19 @@ To start using the FreshRSS API client, initialize it with your FreshRSS instanc
 ```python
 from freshrss_api import FreshRSSAPI
 
-# Initialize the client
+# Initialize the client with direct parameters
 client = FreshRSSAPI(
     host="https://freshrss.example.net",
     username="your_username",
     password="your_api_password"
 )
+
+# Or use environment variables
+# export FRESHRSS_PYTHON_API_HOST="https://freshrss.example.net"
+# export FRESHRSS_PYTHON_API_USERNAME="your_username"
+# export FRESHRSS_PYTHON_API_PASSWORD="your_api_password"
+# export FRESHRSS_PYTHON_API_VERIFY_SSL="true"
+client = FreshRSSAPI()  # Will use environment variables
 ```
 
 ### Fetching Items
