@@ -188,11 +188,12 @@ class FreshRSSAPI:
         Args:
             timeout: Maximum time in seconds to spend fetching all items (default: 300)
             verbose: If True, prints progress information during fetching (default: False)
-            n_max: Optional maximum number of items to retrieve (default: None)
+            n_max: Optional maximum number of items to retrieve. It only accepts multiple of 50 because of the way Fever works (default: None)
 
         Returns:
             List of Item objects
         """
+        assert n_max % 50 == 0, "n_max argument can only be a multiple of 50"
         all_items = []
         current_since_id = 0  # Start with 0 to get newest items
         start_time = time.time()

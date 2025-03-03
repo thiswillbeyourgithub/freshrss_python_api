@@ -126,8 +126,7 @@ def test_get_items(freshrss_client):
 
 def test_get_all_items(freshrss_client):
     """Test that we can retrieve all items with pagination."""
-    # Limit to 10 items for test speed
-    all_items = freshrss_client.get_all_items(n_max=10)
+    all_items = freshrss_client.get_all_items(n_max=100)
     assert all_items is not None
     assert isinstance(all_items, list)
-    assert len(all_items) <= 10
+    assert len(all_items) <= 100
