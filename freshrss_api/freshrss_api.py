@@ -14,8 +14,8 @@ except ImportError:
     def optional_typecheck(callable):
         return callable
 
-from utils.items import Item
-from utils.errors import APIError, AuthenticationError
+from .utils.items import Item
+from .utils.errors import APIError, AuthenticationError
 
 
 @optional_typecheck
