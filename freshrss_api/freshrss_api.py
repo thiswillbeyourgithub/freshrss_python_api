@@ -182,17 +182,44 @@ class FreshRSSAPI:
 
         Returns:
             List of Item objects
+
+        Raises:
+            APIError: If the API doesn't return all requested items
         """
         params = {}
         if since_id is not None:
             params["since_id"] = str(since_id)
         if max_id is not None:
             params["max_id"] = str(max_id)
+        
+        all_items = []
+        
+        # Handle with_id parameter, which has a limit of 50 items per request
         if with_id is not None:
-            params["with_ids"] = ",".join(str(id) for id in with_id)
-
-        response = self._call("items", **params)
-        return [self._dict_to_item(item) for item in response.get("items", [])]
+            # Process in batches of 50
+            with_id_list = list(with_id)  # Convert to list if it's not already
+            total_requested = len(with_id_list)
+            
+            for i in range(0, total_requested, 50):
+                batch = with_id_list[i:i+50]
+                batch_params = params.copy()
+                batch_params["with_ids"] = ",".join(str(id) for id in batch)
+                
+                response = self._call("items", **batch_params)
+                all_items.extend([self._dict_to_item(item) for item in response.get("items", [])])
+            
+            # Verify we got all the items we requested
+            if len(all_items) != total_requested:
+                raise APIError(
+                    f"API returned {len(all_items)} items but {total_requested} were requested. "
+                    f"Some items may not exist or may not be accessible."
+                )
+        else:
+            # Standard request without with_id
+            response = self._call("items", **params)
+            all_items = [self._dict_to_item(item) for item in response.get("items", [])]
+            
+        return all_items
 
     def get_all_items(
         self, timeout: int = 300, verbose: bool = False, n_max: Optional[int] = None
