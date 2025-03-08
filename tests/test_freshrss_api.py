@@ -230,7 +230,8 @@ def test_get_items_from_dates(freshrss_client):
 
 
 def test_set_mark(freshrss_client):
-    """Test that we can mark items as read or saved/unsaved."""
+    """Test that we can mark items saved/unsaved. We don't test read as it's
+    harder to reverse."""
     # First get some unread items to mark
     unread_items = freshrss_client.get_unreads()
     
@@ -240,11 +241,12 @@ def test_set_mark(freshrss_client):
     # Take the first item for testing
     item = unread_items[0]
     
+    # Not testing read because it cannot be undone.
     # Test marking as read
-    response = freshrss_client.set_mark(as_="read", id=item.id)
-    assert response is not None
-    assert isinstance(response, dict)
-    assert "read_item_ids" in response
+    # response = freshrss_client.set_mark(as_="read", id=item.id)
+    # assert response is not None
+    # assert isinstance(response, dict)
+    # assert "read_item_ids" in response
     
     # Test marking as saved
     response = freshrss_client.set_mark(as_="saved", id=item.id)
