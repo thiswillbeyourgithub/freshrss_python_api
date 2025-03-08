@@ -191,60 +191,6 @@ class FreshRSSAPI:
         """
         return self._call("mark", as_=as_, id=str(id))
 
-    def get_items(
-        self,
-        since_id: Union[str, int, None] = None,
-        max_id: Union[str, int, None] = None,
-        with_id: Optional[list[int]] = None,
-    ) -> list[Item]:
-        """
-        Get items from the FreshRSS instance.
-
-        Args:
-            since_id: Optional ID to get items newer than this ID
-            max_id: Optional ID to get items older than this ID
-            with_id: Optional list of item IDs to retrieve
-
-        Returns:
-            List of Item objects
-
-        Raises:
-            APIError: If the API doesn't return all requested items
-        """
-        params = {}
-        if since_id is not None:
-            params["since_id"] = str(since_id)
-        if max_id is not None:
-            params["max_id"] = str(max_id)
-        
-        all_items = []
-        
-        # Handle with_id parameter, which has a limit of 50 items per request
-        if with_id is not None:
-            # Process in batches of 50
-            with_id_list = list(with_id)  # Convert to list if it's not already
-            total_requested = len(with_id_list)
-            
-            for i in range(0, total_requested, 50):
-                batch = with_id_list[i:i+50]
-                batch_params = params.copy()
-                batch_params["with_ids"] = ",".join(str(id) for id in batch)
-                
-                response = self._call("items", **batch_params)
-                all_items.extend([self._dict_to_item(item) for item in response.get("items", [])])
-            
-            # Verify we got all the items we requested
-            if len(all_items) != total_requested:
-                raise APIError(
-                    f"API returned {len(all_items)} items but {total_requested} were requested. "
-                    f"Some items may not exist or may not be accessible."
-                )
-        else:
-            # Standard request without with_id
-            response = self._call("items", **params)
-            all_items = [self._dict_to_item(item) for item in response.get("items", [])]
-            
-        return all_items
 
     def get_feeds(self) -> Dict[str, Any]:
         """
@@ -274,7 +220,7 @@ class FreshRSSAPI:
         unread_ids = self._call("unread_item_ids").get("unread_item_ids", "").split(",")
         if not (unread_ids and unread_ids[0]):  # Check if we have any IDs
             return []
-        items = self.get_items(with_id=[int(id) for id in unread_ids])
+        items = self.get_items_from_ids(ids=[int(id) for id in unread_ids])
         return items
 
     def get_saved(self) -> list[Item]:
@@ -287,7 +233,7 @@ class FreshRSSAPI:
         saved_ids = self._call("saved_item_ids").get("saved_item_ids", "").split(",")
         if not(saved_ids and saved_ids[0]):  # Check if we have any IDs
             return []
-        items = self.get_items(with_id=[int(id) for id in saved_ids])
+        items = self.get_items_from_ids(ids=[int(id) for id in saved_ids])
         return items
     
     def get_items_from_ids(self, ids: list[int]) -> list[Item]:
