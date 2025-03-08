@@ -430,7 +430,11 @@ class FreshRSSAPI:
             # Update since_id for next iteration
             current_since_id = highest_id
             
-            # Verify no duplicates
-            assert len(all_items) == len(seen_ids), "Duplicate items detected in results"
+            # Verify no duplicates - crash if we find any
+            if len(all_items) != len(seen_ids):
+                raise RuntimeError(
+                    f"Duplicate item IDs detected in results! This should never happen. "
+                    f"Items count: {len(all_items)}, Unique IDs count: {len(seen_ids)}"
+                )
             
         return all_items
