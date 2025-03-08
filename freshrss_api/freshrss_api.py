@@ -137,6 +137,45 @@ class FreshRSSAPI:
         except ValueError as e:
             raise APIError(f"Failed to parse API response: {str(e)}")
 
+    def _dict_to_item(self, item_dict: Dict[str, Any]) -> Item:
+        """Convert a dictionary to an Item object."""
+        return Item(
+            id=int(item_dict["id"]),
+            feed_id=int(item_dict["feed_id"]),
+            title=item_dict["title"],
+            author=item_dict["author"],
+            html=item_dict["html"],
+            url=item_dict["url"],
+            is_saved=bool(item_dict["is_saved"]),
+            is_read=bool(item_dict["is_read"]),
+            created_on_time=int(item_dict["created_on_time"]),
+        )
+
+    @staticmethod
+    def _date_to_id(date_str: str, date_format: str = '%Y-%m-%d') -> int:
+        """
+        Convert a date string to a millisecond timestamp integer.
+        
+        This can be useful for converting dates to IDs for API queries.
+        
+        Args:
+            date_str: Date string to convert (e.g., '2023-01-15')
+            date_format: Format string for parsing the date (e.g., '%Y-%m-%d', default: '%Y-%m-%d')
+            
+        Returns:
+            Integer timestamp in milliseconds
+            
+        Example:
+            >>> FreshRSSAPI._date_to_id('2023-01-15')
+            1673740800000000000
+        """
+        dt = datetime.strptime(date_str, date_format)
+        # Ensure the datetime is timezone-aware (UTC)
+        dt = dt.replace(tzinfo=timezone.utc)
+        # Convert to milliseconds (seconds * 10^6)
+        return int(dt.timestamp() * 1_000_000)
+        
+
     def set_mark(
         self, as_: Literal["read", "unread"], id: Union[str, int]
     ) -> Dict[str, Any]:
@@ -151,20 +190,6 @@ class FreshRSSAPI:
             Dict containing the API response
         """
         return self._call("mark", as_=as_, id=str(id))
-
-    def _dict_to_item(self, item_dict: Dict[str, Any]) -> Item:
-        """Convert a dictionary to an Item object."""
-        return Item(
-            id=int(item_dict["id"]),
-            feed_id=int(item_dict["feed_id"]),
-            title=item_dict["title"],
-            author=item_dict["author"],
-            html=item_dict["html"],
-            url=item_dict["url"],
-            is_saved=bool(item_dict["is_saved"]),
-            is_read=bool(item_dict["is_read"]),
-            created_on_time=int(item_dict["created_on_time"]),
-        )
 
     def get_items(
         self,
@@ -307,30 +332,6 @@ class FreshRSSAPI:
             
         return all_items
         
-    @staticmethod
-    def date_to_id(date_str: str, date_format: str = '%Y-%m-%d') -> int:
-        """
-        Convert a date string to a millisecond timestamp integer.
-        
-        This can be useful for converting dates to IDs for API queries.
-        
-        Args:
-            date_str: Date string to convert (e.g., '2023-01-15')
-            date_format: Format string for parsing the date (e.g., '%Y-%m-%d', default: '%Y-%m-%d')
-            
-        Returns:
-            Integer timestamp in milliseconds
-            
-        Example:
-            >>> FreshRSSAPI.date_to_id('2023-01-15')
-            1673740800000000000
-        """
-        dt = datetime.strptime(date_str, date_format)
-        # Ensure the datetime is timezone-aware (UTC)
-        dt = dt.replace(tzinfo=timezone.utc)
-        # Convert to milliseconds (seconds * 10^6)
-        return int(dt.timestamp() * 1_000_000)
-        
     def get_items_from_dates(
         self, 
         since: Union[str, int, datetime, None] = None, 
@@ -369,7 +370,7 @@ class FreshRSSAPI:
             
         # Convert since to timestamp if it's not already
         if isinstance(since, str):
-            since_id = self.date_to_id(since, date_format)
+            since_id = self._date_to_id(since, date_format)
         elif isinstance(since, datetime):
             since_id = int(since.timestamp() * 1_000_000)
         else:
@@ -379,7 +380,7 @@ class FreshRSSAPI:
         if until is None:
             until_id = int(datetime.now(timezone.utc).timestamp() * 1_000_000)
         elif isinstance(until, str):
-            until_id = self.date_to_id(until, date_format)
+            until_id = self._date_to_id(until, date_format)
         elif isinstance(until, datetime):
             until_id = int(until.timestamp() * 1_000_000)
         else:
