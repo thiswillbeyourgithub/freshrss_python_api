@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from importlib.util import find_spec
 
 
-@dataclass
+@dataclass(frozen=True)
 class Item:
     id: int
     feed_id: int
