@@ -107,7 +107,7 @@ def test_freshrss_api(
     # Test get_items_from_dates
     from datetime import datetime, timedelta
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
+    start_date = end_date - timedelta(hours=3)
     
     print(f"Fetching items from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}...")
     date_items = inst.get_items_from_dates(since=start_date, until=end_date)
@@ -214,9 +214,9 @@ def test_get_items_from_ids(freshrss_client):
 
 def test_get_items_from_dates(freshrss_client):
     """Test that we can retrieve items by date range."""
-    # Test with last 30 days
+    # Test with last few moments
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=30)
+    start_date = end_date - timedelta(hours=3)
     
     items = freshrss_client.get_items_from_dates(since=start_date, until=end_date)
     assert items is not None
