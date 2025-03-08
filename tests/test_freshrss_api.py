@@ -103,14 +103,6 @@ def test_freshrss_api(
     return True
 
 
-if __name__ == "__main__":
-    try:
-        fire.Fire(test_freshrss_api)
-    except AssertionError as e:
-        print(f"❌ Test failed: {e}")
-        exit(1)
-
-
 def test_get_feeds(freshrss_client):
     """Test that we can retrieve feeds from the API."""
     feeds = freshrss_client.get_feeds()
@@ -139,3 +131,11 @@ def test_get_all_items(freshrss_client):
     assert all_items is not None
     assert isinstance(all_items, list)
     assert len(all_items) <= 100
+
+if __name__ == "__main__":
+    try:
+        fire.Fire(test_freshrss_api)
+    except AssertionError as e:
+        print(f"❌ Test failed: {e}")
+        exit(1)
+
