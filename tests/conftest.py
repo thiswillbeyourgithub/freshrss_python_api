@@ -3,7 +3,7 @@ import pytest
 from freshrss_api import FreshRSSAPI
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def freshrss_client():
     """
     Fixture that provides a configured FreshRSS API client.
