@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import os
 import random
@@ -352,3 +352,27 @@ class FreshRSSAPI:
             return []
         items = self.get_items(with_id=[int(id) for id in saved_ids])
         return items
+        
+    @staticmethod
+    def date_to_id(date_str: str, date_format: str) -> int:
+        """
+        Convert a date string to a millisecond timestamp integer.
+        
+        This can be useful for converting dates to IDs for API queries.
+        
+        Args:
+            date_str: Date string to convert (e.g., '2023-01-15')
+            date_format: Format string for parsing the date (e.g., '%Y-%m-%d')
+            
+        Returns:
+            Integer timestamp in milliseconds
+            
+        Example:
+            >>> FreshRSSAPI.date_to_id('2023-01-15', '%Y-%m-%d')
+            1673740800000000000
+        """
+        dt = datetime.strptime(date_str, date_format)
+        # Ensure the datetime is timezone-aware (UTC)
+        dt = dt.replace(tzinfo=timezone.utc)
+        # Convert to milliseconds (seconds * 10^6)
+        return int(dt.timestamp() * 1_000_000)
