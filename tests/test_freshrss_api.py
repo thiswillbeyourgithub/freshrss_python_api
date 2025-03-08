@@ -250,17 +250,30 @@ def test_set_mark(freshrss_client):
     # assert isinstance(response, dict)
     # assert "read_item_ids" in response
     
-    # Test marking as saved
-    response = freshrss_client.set_mark(as_="saved", id=item.id)
-    assert response is not None
-    assert isinstance(response, dict)
-    assert "saved_item_ids" in response
-    
-    # Test marking as unsaved
-    response = freshrss_client.set_mark(as_="unsaved", id=item.id)
-    assert response is not None
-    assert isinstance(response, dict)
-    assert "saved_item_ids" in response
+    if item.is_saved:
+        # Test marking as unsaved
+        response = freshrss_client.set_mark(as_="unsaved", id=item.id)
+        assert response is not None
+        assert isinstance(response, dict)
+        assert "saved_item_ids" in response
+        
+        # Test marking as saved
+        response = freshrss_client.set_mark(as_="saved", id=item.id)
+        assert response is not None
+        assert isinstance(response, dict)
+        assert "saved_item_ids" in response
+    else:
+        # Test marking as saved
+        response = freshrss_client.set_mark(as_="saved", id=item.id)
+        assert response is not None
+        assert isinstance(response, dict)
+        assert "saved_item_ids" in response
+        
+        # Test marking as unsaved
+        response = freshrss_client.set_mark(as_="unsaved", id=item.id)
+        assert response is not None
+        assert isinstance(response, dict)
+        assert "saved_item_ids" in response
 
 
 if __name__ == "__main__":
