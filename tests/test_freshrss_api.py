@@ -1,6 +1,7 @@
 import pytest
 from freshrss_api import FreshRSSAPI
 import os
+from datetime import datetime, timedelta
 
 
 def get_freshrss_client(
@@ -116,6 +117,23 @@ def test_freshrss_api(
     return True
 
 
+@pytest.fixture
+def freshrss_client():
+    """Fixture to provide a FreshRSS API client for tests."""
+    # Skip tests if environment variables are not set
+    required_vars = [
+        "PYTEST_FRESHRSS_PYTHON_API_HOST",
+        "PYTEST_FRESHRSS_PYTHON_API_USERNAME",
+        "PYTEST_FRESHRSS_PYTHON_API_PASSWORD"
+    ]
+    
+    missing = [var for var in required_vars if not os.environ.get(var)]
+    if missing:
+        pytest.skip(f"Missing required environment variables: {', '.join(missing)}")
+    
+    return get_freshrss_client()
+
+
 def test_get_feeds(freshrss_client):
     """Test that we can retrieve feeds from the API."""
     feeds = freshrss_client.get_feeds()
@@ -154,6 +172,22 @@ def test_get_saved(freshrss_client):
     assert isinstance(items, list)
 
 
+def test_date_to_id():
+    """Test the _date_to_id static method."""
+    # Test with a known date
+    date_str = "2023-01-15"
+    expected_id = 1673740800000000  # This is the timestamp for 2023-01-15 00:00:00 UTC in microseconds
+    
+    # Allow for small differences due to timezone handling
+    result = FreshRSSAPI._date_to_id(date_str)
+    assert abs(result - expected_id) < 86400000000  # Within one day in microseconds
+    
+    # Test with a different format
+    date_str = "15/01/2023"
+    result = FreshRSSAPI._date_to_id(date_str, date_format="%d/%m/%Y")
+    assert abs(result - expected_id) < 86400000000  # Within one day in microseconds
+
+
 def test_get_items_from_ids(freshrss_client):
     """Test that we can retrieve items by IDs."""
     # First get some unread items to get valid IDs
@@ -178,8 +212,6 @@ def test_get_items_from_ids(freshrss_client):
 
 def test_get_items_from_dates(freshrss_client):
     """Test that we can retrieve items by date range."""
-    from datetime import datetime, timedelta
-    
     # Test with last 30 days
     end_date = datetime.now()
     start_date = end_date - timedelta(days=30)
@@ -195,6 +227,36 @@ def test_get_items_from_dates(freshrss_client):
     )
     assert items_str is not None
     assert isinstance(items_str, list)
+
+
+def test_set_mark(freshrss_client):
+    """Test that we can mark items as read or saved/unsaved."""
+    # First get some unread items to mark
+    unread_items = freshrss_client.get_unreads()
+    
+    if not unread_items:
+        pytest.skip("No unread items available for testing set_mark")
+    
+    # Take the first item for testing
+    item = unread_items[0]
+    
+    # Test marking as read
+    response = freshrss_client.set_mark(as_="read", id=item.id)
+    assert response is not None
+    assert isinstance(response, dict)
+    assert "read_item_ids" in response
+    
+    # Test marking as saved
+    response = freshrss_client.set_mark(as_="saved", id=item.id)
+    assert response is not None
+    assert isinstance(response, dict)
+    assert "saved_item_ids" in response
+    
+    # Test marking as unsaved
+    response = freshrss_client.set_mark(as_="unsaved", id=item.id)
+    assert response is not None
+    assert isinstance(response, dict)
+    assert "saved_item_ids" in response
 
 
 if __name__ == "__main__":
