@@ -114,6 +114,9 @@ class FreshRSSAPI:
         if endpoint != "api":
             query_params[endpoint] = ""
         query_params.update(params)
+        if "as_" in query_params:  # as is a python keyword
+            query_params["as"] = query_params["as_"]
+            del query_params["as_"]
 
         try:
             response = requests.post(
