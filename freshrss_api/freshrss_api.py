@@ -327,3 +327,110 @@ class FreshRSSAPI:
         dt = dt.replace(tzinfo=timezone.utc)
         # Convert to milliseconds (seconds * 10^6)
         return int(dt.timestamp() * 1_000_000)
+        
+    def get_items_from_dates(
+        self, 
+        since: Union[str, int, datetime, None] = None, 
+        until: Union[str, int, datetime, None] = None,
+        date_format: str = '%Y-%m-%d'
+    ) -> list[Item]:
+        """
+        Get items between two dates or timestamps.
+        
+        Args:
+            since: Starting date/time (inclusive). Can be:
+                   - A string in the format specified by date_format
+                   - A datetime object
+                   - An integer timestamp
+                   - None (will raise an error as this is required)
+            until: Ending date/time (inclusive). Can be:
+                   - A string in the format specified by date_format
+                   - A datetime object
+                   - An integer timestamp
+                   - None (defaults to current time)
+            date_format: Format string for parsing date strings (default: '%Y-%m-%d')
+            
+        Returns:
+            List of Item objects between the specified dates
+            
+        Raises:
+            ValueError: If since is None or if since is greater than or equal to until
+            
+        Example:
+            >>> api.get_items_from_dates('2023-01-01', '2023-01-31')
+            [Item(...), Item(...), ...]
+        """
+        # Ensure since is provided
+        if since is None:
+            raise ValueError("The 'since' parameter is required")
+            
+        # Convert since to timestamp if it's not already
+        if isinstance(since, str):
+            since_id = self.date_to_id(since, date_format)
+        elif isinstance(since, datetime):
+            since_id = int(since.timestamp() * 1_000_000)
+        else:
+            since_id = int(since)
+            
+        # Convert until to timestamp if provided, otherwise use current time
+        if until is None:
+            until_id = int(datetime.now(timezone.utc).timestamp() * 1_000_000)
+        elif isinstance(until, str):
+            until_id = self.date_to_id(until, date_format)
+        elif isinstance(until, datetime):
+            until_id = int(until.timestamp() * 1_000_000)
+        else:
+            until_id = int(until)
+            
+        # Validate that since is before until
+        assert since_id < until_id, "The 'since' date must be earlier than the 'until' date"
+        
+        all_items = []
+        seen_ids = set()
+        current_since_id = since_id
+        
+        while True:
+            # Fetch a batch of items
+            response = self._call("items", since_id=str(current_since_id))
+            items_batch = response.get("items", [])
+            
+            # If no items returned, we're done
+            if not items_batch:
+                break
+                
+            # Process items, filtering by until_id
+            new_items = []
+            highest_id = current_since_id
+            
+            for item_dict in items_batch:
+                item_id = int(item_dict["id"])
+                
+                # Skip if we've already seen this ID
+                if item_id in seen_ids:
+                    continue
+                    
+                # Skip if item is beyond our until date
+                if item_id > until_id:
+                    continue
+                    
+                # Add to our results
+                new_items.append(self._dict_to_item(item_dict))
+                seen_ids.add(item_id)
+                
+                # Track highest ID for next iteration
+                highest_id = max(highest_id, item_id)
+            
+            # Add filtered items to our results
+            all_items.extend(new_items)
+            
+            # If we got fewer than 50 items, we've reached the end
+            if len(items_batch) < 50:
+                break
+                
+            # Update since_id for next iteration
+            current_since_id = highest_id
+            
+            # Verify no duplicates
+            assert len(all_items) == len(seen_ids), "Duplicate items detected in results"
+            
+        return all_items
