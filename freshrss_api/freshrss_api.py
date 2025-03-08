@@ -302,6 +302,9 @@ class FreshRSSAPI:
                 f"Some items may not exist or may not be accessible."
             )
             
+        # Sort items by ID
+        all_items.sort(key=lambda item: item.id)
+            
         return all_items
         
     @staticmethod
@@ -436,5 +439,8 @@ class FreshRSSAPI:
                     f"Duplicate item IDs detected in results! This should never happen. "
                     f"Items count: {len(all_items)}, Unique IDs count: {len(seen_ids)}"
                 )
+            
+        # Sort items by ID before returning
+        all_items.sort(key=lambda item: item.id)
             
         return all_items
