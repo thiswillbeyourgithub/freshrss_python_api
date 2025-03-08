@@ -222,10 +222,11 @@ def test_get_items_from_dates(freshrss_client):
     assert items is not None
     assert isinstance(items, list)
     
-    # Test with string dates
+    # Test with string dates (including hours to distinguish times within the same day)
     items_str = freshrss_client.get_items_from_dates(
-        since=start_date.strftime("%Y-%m-%d"),
-        until=end_date.strftime("%Y-%m-%d")
+        since=start_date.strftime("%Y-%m-%d %H:%M:%S"),
+        until=end_date.strftime("%Y-%m-%d %H:%M:%S"),
+        date_format="%Y-%m-%d %H:%M:%S"
     )
     assert items_str is not None
     assert isinstance(items_str, list)
