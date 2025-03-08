@@ -308,10 +308,10 @@ class FreshRSSAPI:
             List of unread Item objects
         """
         unread_ids = self._call("unread_item_ids").get("unread_item_ids", "").split(",")
-        if unread_ids and unread_ids[0]:  # Check if we have any IDs
-            items = self.get_items(with_id=[int(id) for id in unread_ids])
-            return items
-        return []
+        if not (unread_ids and unread_ids[0]):  # Check if we have any IDs
+            return []
+        items = self.get_items(with_id=[int(id) for id in unread_ids])
+        return items
 
     def get_saved(self) -> list[Item]:
         """
@@ -321,7 +321,7 @@ class FreshRSSAPI:
             List of saved Item objects
         """
         saved_ids = self._call("saved_item_ids").get("saved_item_ids", "").split(",")
-        if saved_ids and saved_ids[0]:  # Check if we have any IDs
-            items = self.get_items(with_id=[int(id) for id in saved_ids])
-            return items
-        return []
+        if not(saved_ids and saved_ids[0]):  # Check if we have any IDs
+            return []
+        items = self.get_items(with_id=[int(id) for id in saved_ids])
+        return items
