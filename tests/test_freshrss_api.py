@@ -106,10 +106,13 @@ def test_freshrss_api(
 
     # Test get_items_from_dates
     from datetime import datetime, timedelta
+
     end_date = datetime.now()
     start_date = end_date - timedelta(hours=3)
-    
-    print(f"Fetching items from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}...")
+
+    print(
+        f"Fetching items from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}..."
+    )
     date_items = inst.get_items_from_dates(since=start_date, until=end_date)
     assert date_items is not None, "Failed to retrieve items by date"
     assert isinstance(date_items, list), "Items by date should be returned as a list"
@@ -126,13 +129,13 @@ def freshrss_client():
     required_vars = [
         "PYTEST_FRESHRSS_PYTHON_API_HOST",
         "PYTEST_FRESHRSS_PYTHON_API_USERNAME",
-        "PYTEST_FRESHRSS_PYTHON_API_PASSWORD"
+        "PYTEST_FRESHRSS_PYTHON_API_PASSWORD",
     ]
-    
+
     missing = [var for var in required_vars if not os.environ.get(var)]
     if missing:
         pytest.skip(f"Missing required environment variables: {', '.join(missing)}")
-    
+
     return get_freshrss_client()
 
 
@@ -179,11 +182,11 @@ def test_date_to_id():
     # Test with a known date
     date_str = "2023-01-15"
     expected_id = 1673740800000000  # This is the timestamp for 2023-01-15 00:00:00 UTC in microseconds
-    
+
     # Allow for small differences due to timezone handling
     result = FreshRSSAPI._date_to_id(date_str)
     assert abs(result - expected_id) < 86400000000  # Within one day in microseconds
-    
+
     # Test with a different format
     date_str = "15/01/2023"
     result = FreshRSSAPI._date_to_id(date_str, date_format="%d/%m/%Y")
@@ -194,19 +197,19 @@ def test_get_items_from_ids(freshrss_client):
     """Test that we can retrieve items by IDs."""
     # First get some unread items to get valid IDs
     unread_items = freshrss_client.get_unreads()
-    
+
     if not unread_items:
         pytest.skip("No unread items available for testing get_items_from_ids")
-    
+
     # Take up to 3 IDs for testing
     ids = [item.id for item in unread_items[:3]]
-    
+
     # Test retrieving these specific items
     items = freshrss_client.get_items_from_ids(ids)
     assert items is not None
     assert isinstance(items, list)
     assert len(items) == len(ids)
-    
+
     # Verify we got the correct items
     retrieved_ids = [item.id for item in items]
     assert sorted(retrieved_ids) == sorted(ids)
@@ -217,16 +220,16 @@ def test_get_items_from_dates(freshrss_client):
     # Test with last few moments
     end_date = datetime.now()
     start_date = end_date - timedelta(hours=3)
-    
+
     items = freshrss_client.get_items_from_dates(since=start_date, until=end_date)
     assert items is not None
     assert isinstance(items, list)
-    
+
     # Test with string dates (including hours to distinguish times within the same day)
     items_str = freshrss_client.get_items_from_dates(
         since=start_date.strftime("%Y-%m-%d %H:%M:%S"),
         until=end_date.strftime("%Y-%m-%d %H:%M:%S"),
-        date_format="%Y-%m-%d %H:%M:%S"
+        date_format="%Y-%m-%d %H:%M:%S",
     )
     assert items_str is not None
     assert isinstance(items_str, list)
@@ -237,27 +240,27 @@ def test_set_mark(freshrss_client):
     harder to reverse."""
     # First get some unread items to mark
     unread_items = freshrss_client.get_unreads()
-    
+
     if not unread_items:
         pytest.skip("No unread items available for testing set_mark")
-    
+
     # Take the first item for testing
     item = unread_items[0]
-    
+
     # Not testing read because it cannot be undone.
     # Test marking as read
     # response = freshrss_client.set_mark(as_="read", id=item.id)
     # assert response is not None
     # assert isinstance(response, dict)
     # assert "read_item_ids" in response
-    
+
     if item.is_saved:
         # Test marking as unsaved
         response = freshrss_client.set_mark(as_="unsaved", id=item.id)
         assert response is not None
         assert isinstance(response, dict)
         assert "saved_item_ids" in response
-        
+
         # Test marking as saved
         response = freshrss_client.set_mark(as_="saved", id=item.id)
         assert response is not None
@@ -269,7 +272,7 @@ def test_set_mark(freshrss_client):
         assert response is not None
         assert isinstance(response, dict)
         assert "saved_item_ids" in response
-        
+
         # Test marking as unsaved
         response = freshrss_client.set_mark(as_="unsaved", id=item.id)
         assert response is not None
@@ -279,6 +282,7 @@ def test_set_mark(freshrss_client):
 
 if __name__ == "__main__":
     import fire
+
     try:
         fire.Fire(test_freshrss_api)
     except AssertionError as e:

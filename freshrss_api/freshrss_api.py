@@ -120,7 +120,7 @@ class FreshRSSAPI:
         if "as_" in query_params:  # as is a python keyword
             query_params["as"] = query_params["as_"]
             del query_params["as_"]
-            
+
         if self.verbose:
             logger.info(f"API request: {self.api_endpoint}")
             logger.info(f"Query parameters: {query_params}")
@@ -144,7 +144,7 @@ class FreshRSSAPI:
                 # Check authentication
                 if not result.get("auth"):
                     raise AuthenticationError("Invalid API credentials")
-                    
+
                 if self.verbose:
                     logger.info(f"API response: {result}")
 
@@ -152,17 +152,25 @@ class FreshRSSAPI:
 
             except (requests.exceptions.RequestException, ValueError) as e:
                 retry_count += 1
-                error_type = "API request" if isinstance(e, requests.exceptions.RequestException) else "JSON parsing"
-                
+                error_type = (
+                    "API request"
+                    if isinstance(e, requests.exceptions.RequestException)
+                    else "JSON parsing"
+                )
+
                 if retry_count <= max_retries:
                     if self.verbose:
-                        logger.warning(f"{error_type} failed, retrying in {retry_delay}s: {str(e)}")
+                        logger.warning(
+                            f"{error_type} failed, retrying in {retry_delay}s: {str(e)}"
+                        )
                     time.sleep(retry_delay)
                 else:
                     if isinstance(e, requests.exceptions.RequestException):
                         raise APIError(f"API request failed after retry: {str(e)}")
                     else:
-                        raise APIError(f"Failed to parse API response after retry: {str(e)}")
+                        raise APIError(
+                            f"Failed to parse API response after retry: {str(e)}"
+                        )
 
     def _dict_to_item(self, item_dict: Dict[str, Any]) -> Item:
         """Convert a dictionary to an Item object."""
@@ -222,13 +230,19 @@ class FreshRSSAPI:
 
         if as_ == "read":
             if not "read_item_ids" in resp:
-                logger.error(f"The response to set_mark does not contain 'read_item_ids'")
+                logger.error(
+                    f"The response to set_mark does not contain 'read_item_ids'"
+                )
         elif as_ == "saved":
             if not "saved_item_ids" in resp:
-                logger.error(f"The response to set_mark does not contain 'saved_item_ids'")
+                logger.error(
+                    f"The response to set_mark does not contain 'saved_item_ids'"
+                )
         elif as_ == "unsaved":
             if not "saved_item_ids" in resp:
-                logger.error(f"The response to set_mark does not contain 'saved_item_ids'")
+                logger.error(
+                    f"The response to set_mark does not contain 'saved_item_ids'"
+                )
 
         return resp
 
