@@ -40,5 +40,10 @@ class Item:
 
     @property
     def created_datetime(self) -> datetime:
-        """Return datetime object from timestamp"""
+        """Return datetime object from created_on_time timestamp"""
         return datetime.fromtimestamp(self.created_on_time)
+
+    @property
+    def id_datetime(self) -> datetime:
+        """Return datetime object from id timestamp"""
+        return datetime.fromtimestamp(self.id)
