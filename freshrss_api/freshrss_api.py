@@ -201,7 +201,22 @@ class FreshRSSAPI:
         Returns:
             Dict containing the API response
         """
-        return self._call("mark", as_=as_, id=id)
+        resp = self._call("mark", as_=as_, id=id)
+
+        if as_ == "unread":
+            if not resp.get("unread_item_ids", []):
+                logger.error(f"The response to set_mark does not contain 'unread_item_ids' or is empty")
+        elif as_ == "read":
+            if not resp.get("read_item_ids", []):
+                logger.error(f"The response to set_mark does not contain 'read_item_ids' or is empty")
+        elif as_ == "saved":
+            if not resp.get("saved_item_ids", []):
+                logger.error(f"The response to set_mark does not contain 'saved_item_ids' or is empty")
+        elif as_ == "unsaved":
+            if not resp.get("saved_item_ids", []):
+                logger.error(f"The response to set_mark does not contain 'saved_item_ids' or is empty")
+
+        return resp
 
     def get_feeds(self) -> Dict[str, Any]:
         """
