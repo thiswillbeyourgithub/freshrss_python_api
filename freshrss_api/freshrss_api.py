@@ -264,6 +264,45 @@ class FreshRSSAPI:
             return []
         items = self.get_items(with_id=[int(id) for id in saved_ids])
         return items
+    
+    def get_items_from_ids(self, ids: list[int]) -> list[Item]:
+        """
+        Get items by their IDs from the FreshRSS instance.
+        
+        This method handles batching of requests (max 50 IDs per request)
+        and verifies that all requested items are returned.
+        
+        Args:
+            ids: List of item IDs to retrieve
+            
+        Returns:
+            List of Item objects corresponding to the requested IDs
+            
+        Raises:
+            APIError: If the API doesn't return all requested items
+        """
+        if not ids:
+            return []
+            
+        all_items = []
+        total_requested = len(ids)
+        
+        # Process in batches of 50
+        for i in range(0, total_requested, 50):
+            batch = ids[i:i+50]
+            batch_params = {"with_ids": ",".join(str(id) for id in batch)}
+            
+            response = self._call("items", **batch_params)
+            all_items.extend([self._dict_to_item(item) for item in response.get("items", [])])
+        
+        # Verify we got all the items we requested
+        if len(all_items) != total_requested:
+            raise APIError(
+                f"API returned {len(all_items)} items but {total_requested} were requested. "
+                f"Some items may not exist or may not be accessible."
+            )
+            
+        return all_items
         
     @staticmethod
     def date_to_id(date_str: str, date_format: str = '%Y-%m-%d') -> int:
