@@ -354,7 +354,7 @@ class FreshRSSAPI:
         return items
         
     @staticmethod
-    def date_to_id(date_str: str, date_format: str) -> int:
+    def date_to_id(date_str: str, date_format: str = '%Y-%m-%d') -> int:
         """
         Convert a date string to a millisecond timestamp integer.
         
@@ -362,13 +362,13 @@ class FreshRSSAPI:
         
         Args:
             date_str: Date string to convert (e.g., '2023-01-15')
-            date_format: Format string for parsing the date (e.g., '%Y-%m-%d')
+            date_format: Format string for parsing the date (e.g., '%Y-%m-%d', default: '%Y-%m-%d')
             
         Returns:
             Integer timestamp in milliseconds
             
         Example:
-            >>> FreshRSSAPI.date_to_id('2023-01-15', '%Y-%m-%d')
+            >>> FreshRSSAPI.date_to_id('2023-01-15')
             1673740800000000000
         """
         dt = datetime.strptime(date_str, date_format)
