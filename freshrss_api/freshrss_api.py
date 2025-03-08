@@ -176,13 +176,13 @@ class FreshRSSAPI:
         return int(dt.timestamp() * 1_000_000)
 
     def set_mark(
-        self, as_: Literal["read", "unread"], id: Union[str, int]
+        self, as_: Literal["read", "unread", "saved", "unsaved"], id: Union[str, int]
     ) -> Dict[str, Any]:
         """
-        Mark an item as read or unread.
+        Mark an item as read/unread or saved/unsaved.
 
         Args:
-            as_: Status to set ('read' or 'unread')
+            as_: Status to set ('read', 'unread', 'saved', or 'unsaved')
             id: ID of the item to mark
 
         Returns:
