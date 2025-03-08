@@ -152,19 +152,19 @@ class FreshRSSAPI:
         )
 
     @staticmethod
-    def _date_to_id(date_str: str, date_format: str = '%Y-%m-%d') -> int:
+    def _date_to_id(date_str: str, date_format: str = "%Y-%m-%d") -> int:
         """
         Convert a date string to a millisecond timestamp integer.
-        
+
         This can be useful for converting dates to IDs for API queries.
-        
+
         Args:
             date_str: Date string to convert (e.g., '2023-01-15')
             date_format: Format string for parsing the date (e.g., '%Y-%m-%d', default: '%Y-%m-%d')
-            
+
         Returns:
             Integer timestamp in milliseconds
-            
+
         Example:
             >>> FreshRSSAPI._date_to_id('2023-01-15')
             1673740800000000000
@@ -174,7 +174,6 @@ class FreshRSSAPI:
         dt = dt.replace(tzinfo=timezone.utc)
         # Convert to milliseconds (seconds * 10^6)
         return int(dt.timestamp() * 1_000_000)
-        
 
     def set_mark(
         self, as_: Literal["read", "unread"], id: Union[str, int]
@@ -190,7 +189,6 @@ class FreshRSSAPI:
             Dict containing the API response
         """
         return self._call("mark", as_=as_, id=str(id))
-
 
     def get_feeds(self) -> Dict[str, Any]:
         """
@@ -231,62 +229,64 @@ class FreshRSSAPI:
             List of saved Item objects
         """
         saved_ids = self._call("saved_item_ids").get("saved_item_ids", "").split(",")
-        if not(saved_ids and saved_ids[0]):  # Check if we have any IDs
+        if not (saved_ids and saved_ids[0]):  # Check if we have any IDs
             return []
         items = self.get_items_from_ids(ids=[int(id) for id in saved_ids])
         return items
-    
+
     def get_items_from_ids(self, ids: list[int]) -> list[Item]:
         """
         Get items by their IDs from the FreshRSS instance.
-        
+
         This method handles batching of requests (max 50 IDs per request)
         and verifies that all requested items are returned.
-        
+
         Args:
             ids: List of item IDs to retrieve
-            
+
         Returns:
             List of Item objects corresponding to the requested IDs
-            
+
         Raises:
             APIError: If the API doesn't return all requested items
         """
         if not ids:
             return []
-            
+
         all_items = []
         total_requested = len(ids)
-        
+
         # Process in batches of 50
         for i in range(0, total_requested, 50):
-            batch = ids[i:i+50]
+            batch = ids[i : i + 50]
             batch_params = {"with_ids": ",".join(str(id) for id in batch)}
-            
+
             response = self._call("items", **batch_params)
-            all_items.extend([self._dict_to_item(item) for item in response.get("items", [])])
-        
+            all_items.extend(
+                [self._dict_to_item(item) for item in response.get("items", [])]
+            )
+
         # Verify we got all the items we requested
         if len(all_items) != total_requested:
             raise APIError(
                 f"API returned {len(all_items)} items but {total_requested} were requested. "
                 f"Some items may not exist or may not be accessible."
             )
-            
+
         # Sort items by ID
         all_items.sort(key=lambda item: item.id)
-            
+
         return all_items
-        
+
     def get_items_from_dates(
-        self, 
-        since: Union[str, int, datetime, None] = None, 
+        self,
+        since: Union[str, int, datetime, None] = None,
         until: Union[str, int, datetime, None] = None,
-        date_format: str = '%Y-%m-%d'
+        date_format: str = "%Y-%m-%d",
     ) -> list[Item]:
         """
         Get items between two dates or timestamps.
-        
+
         Args:
             since: Starting date/time (inclusive). Can be:
                    - A string in the format specified by date_format
@@ -299,13 +299,13 @@ class FreshRSSAPI:
                    - An integer timestamp
                    - None (defaults to current time)
             date_format: Format string for parsing date strings (default: '%Y-%m-%d')
-            
+
         Returns:
             List of Item objects between the specified dates
-            
+
         Raises:
             ValueError: If since is None or if since is greater than or equal to until
-            
+
         Example:
             >>> api.get_items_from_dates('2023-01-01', '2023-01-31')
             [Item(...), Item(...), ...]
@@ -313,7 +313,7 @@ class FreshRSSAPI:
         # Ensure since is provided
         if since is None:
             raise ValueError("The 'since' parameter is required")
-            
+
         # Convert since to timestamp if it's not already
         if isinstance(since, str):
             since_id = self._date_to_id(since, date_format)
@@ -321,7 +321,7 @@ class FreshRSSAPI:
             since_id = int(since.timestamp() * 1_000_000)
         else:
             since_id = int(since)
-            
+
         # Convert until to timestamp if provided, otherwise use current time
         if until is None:
             until_id = int(datetime.now(timezone.utc).timestamp() * 1_000_000)
@@ -331,63 +331,65 @@ class FreshRSSAPI:
             until_id = int(until.timestamp() * 1_000_000)
         else:
             until_id = int(until)
-            
+
         # Validate that since is before until
-        assert since_id < until_id, "The 'since' date must be earlier than the 'until' date"
-        
+        assert (
+            since_id < until_id
+        ), "The 'since' date must be earlier than the 'until' date"
+
         all_items = []
         seen_ids = set()
         current_since_id = since_id
-        
+
         while True:
             # Fetch a batch of items
             response = self._call("items", since_id=str(current_since_id))
             items_batch = response.get("items", [])
-            
+
             # If no items returned, we're done
             if not items_batch:
                 break
-                
+
             # Process items, filtering by until_id
             new_items = []
             highest_id = current_since_id
-            
+
             for item_dict in items_batch:
                 item_id = int(item_dict["id"])
-                
+
                 # Skip if we've already seen this ID
                 if item_id in seen_ids:
                     continue
-                    
+
                 # Skip if item is beyond our until date
                 if item_id > until_id:
                     continue
-                    
+
                 # Add to our results
                 new_items.append(self._dict_to_item(item_dict))
                 seen_ids.add(item_id)
-                
+
                 # Track highest ID for next iteration
                 highest_id = max(highest_id, item_id)
-            
+
             # Add filtered items to our results
             all_items.extend(new_items)
-            
+
             # If we got fewer than 50 items, we've reached the end
             if len(items_batch) < 50:
                 break
-                
+
             # Update since_id for next iteration
             current_since_id = highest_id
-            
+
             # Verify no duplicates - crash if we find any
             if len(all_items) != len(seen_ids):
                 raise RuntimeError(
                     f"Duplicate item IDs detected in results! This should never happen. "
                     f"Items count: {len(all_items)}, Unique IDs count: {len(seen_ids)}"
                 )
-            
+
         # Sort items by ID before returning
         all_items.sort(key=lambda item: item.id)
-            
+
         return all_items

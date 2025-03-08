@@ -132,10 +132,10 @@ def test_get_all_items(freshrss_client):
     assert isinstance(all_items, list)
     assert len(all_items) <= 100
 
+
 if __name__ == "__main__":
     try:
         fire.Fire(test_freshrss_api)
     except AssertionError as e:
         print(f"❌ Test failed: {e}")
         exit(1)
-
