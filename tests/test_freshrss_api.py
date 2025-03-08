@@ -9,7 +9,7 @@ def get_freshrss_client(
     username: str = None,
     password: str = None,
     verify_ssl: bool = False,
-    verbose: bool = True,
+    verbose: bool = False,
 ):
     """
     Create a FreshRSS API client using provided credentials or environment variables.
@@ -19,6 +19,7 @@ def get_freshrss_client(
         username: FreshRSS username (defaults to PYTEST_FRESHRSS_PYTHON_API_USERNAME env var)
         password: FreshRSS password (defaults to PYTEST_FRESHRSS_PYTHON_API_PASSWORD env var)
         verify_ssl: Whether to verify SSL certificates
+        verbose: True to enable verbose logging.
 
     Returns:
         FreshRSSAPI instance
