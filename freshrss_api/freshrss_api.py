@@ -94,12 +94,12 @@ class FreshRSSAPI:
         if not response.get("auth"):
             raise AuthenticationError("Failed to authenticate with FreshRSS API")
 
-    def _call(self, endpoint: str, **params: Any) -> Dict[str, Any]:
+    def _call(self, endpoint: str = "api", **params: Any) -> Dict[str, Any]:
         """
         Make a call to the FreshRSS Fever API.
 
         Args:
-            endpoint: API endpoint to call
+            endpoint: API endpoint to call. Defaults to 'api'.
             **params: Additional parameters to include in the request
 
         Returns:
