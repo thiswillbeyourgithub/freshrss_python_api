@@ -8,6 +8,7 @@ import time
 MINIMUM_VALID_TIMESTAMP = 946684800  # January 1, 2000 00:00:00 UTC
 from typing import Union, Optional, Dict, Any, Literal
 from urllib.parse import urljoin
+from loguru import logger
 
 try:
     from beartype import beartype as optional_typecheck
@@ -33,6 +34,7 @@ class FreshRSSAPI:
         username: str = None,
         password: str = None,
         verify_ssl: bool = True,
+        verbose: bool = False,
     ):
         """
         Initialize the FreshRSS API client.
@@ -78,6 +80,7 @@ class FreshRSSAPI:
         self.host = self.host.rstrip("/")
         self.api_endpoint = urljoin(f"{self.host}/api/", "fever.php")
         self.verify_ssl = verify_ssl
+        self.verbose = verbose
 
         # Calculate API key (MD5 hash of "username:password")
         self.api_key = hashlib.md5(f"{username}:{password}".encode()).hexdigest()
@@ -117,6 +120,10 @@ class FreshRSSAPI:
         if "as_" in query_params:  # as is a python keyword
             query_params["as"] = query_params["as_"]
             del query_params["as_"]
+            
+        if self.verbose:
+            logger.info(f"API request: {self.api_endpoint}")
+            logger.info(f"Query parameters: {query_params}")
 
         try:
             response = requests.post(
@@ -132,6 +139,9 @@ class FreshRSSAPI:
             # Check authentication
             if not result.get("auth"):
                 raise AuthenticationError("Invalid API credentials")
+                
+            if self.verbose:
+                logger.info(f"API response: {result}")
 
             return result
 
