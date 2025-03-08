@@ -189,24 +189,24 @@ class FreshRSSAPI:
         return int(dt.timestamp() * 1_000_000)
 
     def set_mark(
-        self, as_: Literal["read", "unread", "saved", "unsaved"], id: Union[str, int]
+        self, as_: Literal["read", "saved", "unsaved"], id: Union[str, int]
     ) -> Dict[str, Any]:
         """
-        Mark an item as read/unread or saved/unsaved.
+        Mark an item as read or saved/unsaved. Fever_API can handle
+        setting marks to other things than items but this is not implemented
+        here. Marking as 'unread' is not possible either.
 
         Args:
-            as_: Status to set ('read', 'unread', 'saved', or 'unsaved')
+            as_: Status to set ('read', 'saved', or 'unsaved')
             id: ID of the item to mark
 
         Returns:
             Dict containing the API response
         """
+        assert as_ != "unread", "The Fever_API does not support marking as 'unread'"
         resp = self._call(mark="item", as_=as_, id=id)
 
-        if as_ == "unread":
-            if not resp.get("unread_item_ids", []):
-                logger.error(f"The response to set_mark does not contain 'unread_item_ids' or is empty")
-        elif as_ == "read":
+        if as_ == "read":
             if not resp.get("read_item_ids", []):
                 logger.error(f"The response to set_mark does not contain 'read_item_ids' or is empty")
         elif as_ == "saved":
