@@ -201,7 +201,7 @@ class FreshRSSAPI:
         Returns:
             Dict containing the API response
         """
-        resp = self._call("mark", as_=as_, id=id)
+        resp = self._call(mark="item", as_=as_, id=id)
 
         if as_ == "unread":
             if not resp.get("unread_item_ids", []):
