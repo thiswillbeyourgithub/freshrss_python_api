@@ -59,7 +59,7 @@ client = FreshRSSAPI()  # Will use environment variables
 
 ### Fetching Items
 
-You can fetch all items, unread items, or saved items using the appropriate methods.
+You can fetch all items, unread items, or saved items using the appropriate methods. Note that the `id` of an item is just the time it was added in milliseconds. So if you use `time.time_ns() // 1000` you get the current time in `id` format. You can also use the method `date_to_id` to turn a human readable date into `id` format. The human readable time values of items can be accessed using `item.created_datetime` and `item.id_datetime` attributes.
 
 ```python
 # Fetch all items
