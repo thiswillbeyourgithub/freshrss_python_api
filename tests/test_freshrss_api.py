@@ -9,6 +9,7 @@ def get_freshrss_client(
     username: str = None,
     password: str = None,
     verify_ssl: bool = False,
+    verbose: bool = True,
 ):
     """
     Create a FreshRSS API client using provided credentials or environment variables.
@@ -44,7 +45,7 @@ def get_freshrss_client(
     os.environ["FRESHRSS_PYTHON_API_VERIFY_SSL"] = str(verify_ssl).lower()
 
     # Use the environment variables for authentication
-    return FreshRSSAPI(verify_ssl=verify_ssl)
+    return FreshRSSAPI(verify_ssl=verify_ssl, verbose=verbose)
 
 
 def test_freshrss_api(
