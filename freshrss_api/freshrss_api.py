@@ -201,7 +201,7 @@ class FreshRSSAPI:
         Returns:
             Dict containing the API response
         """
-        return self._call("mark", as_=as_, id=str(id))
+        return self._call("mark", as_=as_, id=id)
 
     def get_feeds(self) -> Dict[str, Any]:
         """
