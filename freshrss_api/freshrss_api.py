@@ -207,14 +207,14 @@ class FreshRSSAPI:
         resp = self._call(mark="item", as_=as_, id=id)
 
         if as_ == "read":
-            if not resp.get("read_item_ids", []):
-                logger.error(f"The response to set_mark does not contain 'read_item_ids' or is empty")
+            if not "read_item_ids" in resp:
+                logger.error(f"The response to set_mark does not contain 'read_item_ids'")
         elif as_ == "saved":
-            if not resp.get("saved_item_ids", []):
-                logger.error(f"The response to set_mark does not contain 'saved_item_ids' or is empty")
+            if not "saved_item_ids" in resp:
+                logger.error(f"The response to set_mark does not contain 'saved_item_ids'")
         elif as_ == "unsaved":
-            if not resp.get("saved_item_ids", []):
-                logger.error(f"The response to set_mark does not contain 'saved_item_ids' or is empty")
+            if not "saved_item_ids" in resp:
+                logger.error(f"The response to set_mark does not contain 'saved_item_ids'")
 
         return resp
 
