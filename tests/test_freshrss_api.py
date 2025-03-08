@@ -49,7 +49,6 @@ def get_freshrss_client(
     return FreshRSSAPI(verify_ssl=verify_ssl, verbose=verbose)
 
 
-@pytest.fixture(scope="session")
 def test_freshrss_api(
     host: str = None,
     username: str = None,
@@ -120,7 +119,7 @@ def test_freshrss_api(
     return True
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def freshrss_client():
     """Fixture to provide a FreshRSS API client for tests."""
     # Skip tests if environment variables are not set
