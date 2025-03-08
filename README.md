@@ -3,16 +3,18 @@
 [![PyPI Version](https://img.shields.io/pypi/v/freshrss-api)](https://pypi.org/project/freshrss-api/)
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
-A Python client for interacting with the FreshRSS Fever API. This library provides an easy-to-use interface for fetching items, marking items as read/unread, and managing feeds and categories in your FreshRSS instance.
+A Python client for interacting with the FreshRSS Fever API. This library provides an easy-to-use interface for fetching items, marking items as read/saved/unsaved, and managing feeds and categories in your FreshRSS instance.
 
 ## Features
 
 - **Authentication**: Securely authenticate with your FreshRSS instance using your username and API password or environment variables.
-- **Item Management**: Fetch all items, unread items, or saved items. Mark items as read or unread.
+- **Item Management**: Fetch unread items, saved items, or items by ID or date range. Mark items as read, saved, or unsaved.
 - **Feeds & Groups**: Retrieve all feeds and groups (categories) from your FreshRSS instance.
-- **Pagination**: Efficiently fetch large numbers of items with pagination and customizable timeouts.
+- **Date-based Queries**: Fetch items between specific dates with the `get_items_from_dates()` method.
+- **Robust Error Handling**: Automatic retries for API requests with detailed error reporting.
 - **Type Safety**: Optional type checking with `beartype` for improved code reliability.
 - **Environment Variables**: Configure the client using environment variables for easier integration with CI/CD pipelines and containerized environments.
+- **Verbose Logging**: Optional detailed logging of API requests and responses using Loguru.
 
 ## Installation
 
@@ -46,7 +48,9 @@ from freshrss_api import FreshRSSAPI
 client = FreshRSSAPI(
     host="https://freshrss.example.net",
     username="your_username",
-    password="your_api_password"
+    password="your_api_password",
+    verify_ssl=True,
+    verbose=False
 )
 
 # Or use environment variables
@@ -59,50 +63,76 @@ client = FreshRSSAPI()  # Will use environment variables
 
 ### Fetching Items
 
-You can fetch all items, unread items, or saved items using the appropriate methods. Note that the `id` of an item is just the time it was added in milliseconds. So if you use `time.time_ns() // 1000` you get the current time in `id` format. You can also use the method `date_to_id` to turn a human readable date into `id` format. The human readable time values of items can be accessed using `item.created_datetime` and `item.id_datetime` attributes.
+You can fetch unread items, saved items, or items by specific IDs or date ranges:
 
 ```python
-# Fetch all items
-all_items = client.get_all_items()
-
 # Fetch unread items
 unread_items = client.get_unreads()
 
 # Fetch saved items
 saved_items = client.get_saved()
+
+# Fetch items by IDs
+items = client.get_items_from_ids([12345, 67890])
+
+# Fetch items between dates
+items = client.get_items_from_dates(
+    since="2023-01-01",  # Can be string, datetime, or timestamp
+    until="2023-01-31",  # Optional, defaults to current time
+    date_format="%Y-%m-%d"  # Optional format string for date parsing
+)
 ```
 
 ### Marking Items
 
-Mark items as read or unread using the `set_mark` method.
+Mark items as read, saved, or unsaved using the `set_mark` method:
 
 ```python
 # Mark an item as read
 client.set_mark(as_="read", id=12345)
 
-# Mark an item as unread
-client.set_mark(as_="unread", id=12345)
+# Mark an item as saved (starred)
+client.set_mark(as_="saved", id=12345)
+
+# Mark an item as unsaved (unstarred)
+client.set_mark(as_="unsaved", id=12345)
 ```
+
+Note: The Fever API does not support marking items as unread.
 
 ### Managing Feeds and Groups
 
-Fetch all feeds or groups (categories) from your FreshRSS instance.
+Fetch all feeds or groups (categories) from your FreshRSS instance:
 
 ```python
 # Get all feeds
 feeds = client.get_feeds()
 
-# Get all groups
+# Get all groups (categories)
 groups = client.get_groups()
 ```
 
-### Pagination and Timeouts
+### Working with Dates and IDs
 
-When fetching large numbers of items, you can control the timeout and maximum number of items fetched.
+In the FreshRSS API, item IDs are timestamps in microseconds. The library provides a helper method to convert dates to IDs:
 
 ```python
-# Fetch up to 1000 items with a timeout of 60 seconds
-items = client.get_all_items(timeout=60, n_max=1000, verbose=True)
+# Convert a date string to an ID
+id = FreshRSSAPI._date_to_id("2023-01-15")  # Static method
+
+# Item objects have datetime properties
+for item in items:
+    print(f"Item created on: {item.created_datetime}")
+    print(f"Item ID as datetime: {item.id_datetime}")
+```
+
+### Verbose Logging
+
+Enable verbose logging to see detailed information about API requests and responses:
+
+```python
+client = FreshRSSAPI(verbose=True)
+# Now all API calls will log detailed information using Loguru
 ```
 
 ## API Details
@@ -125,4 +155,4 @@ This project was inspired by the need for a simple and reliable Python client fo
 
 ## Contact
 
-For any questions or issues, please open an issue on [GitHub](https://github.com/your-repo/freshrss-api/issues).
+For any questions or issues, please open an issue here.
