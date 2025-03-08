@@ -125,30 +125,44 @@ class FreshRSSAPI:
             logger.info(f"API request: {self.api_endpoint}")
             logger.info(f"Query parameters: {query_params}")
 
-        try:
-            response = requests.post(
-                self.api_endpoint,
-                params=query_params,
-                data=data,
-                verify=self.verify_ssl,
-            )
-            response.raise_for_status()
+        retry_count = 0
+        max_retries = 1
+        retry_delay = 2  # seconds
 
-            result = response.json()
+        while True:
+            try:
+                response = requests.post(
+                    self.api_endpoint,
+                    params=query_params,
+                    data=data,
+                    verify=self.verify_ssl,
+                )
+                response.raise_for_status()
 
-            # Check authentication
-            if not result.get("auth"):
-                raise AuthenticationError("Invalid API credentials")
+                result = response.json()
+
+                # Check authentication
+                if not result.get("auth"):
+                    raise AuthenticationError("Invalid API credentials")
+                    
+                if self.verbose:
+                    logger.info(f"API response: {result}")
+
+                return result
+
+            except (requests.exceptions.RequestException, ValueError) as e:
+                retry_count += 1
+                error_type = "API request" if isinstance(e, requests.exceptions.RequestException) else "JSON parsing"
                 
-            if self.verbose:
-                logger.info(f"API response: {result}")
-
-            return result
-
-        except requests.exceptions.RequestException as e:
-            raise APIError(f"API request failed: {str(e)}")
-        except ValueError as e:
-            raise APIError(f"Failed to parse API response: {str(e)}")
+                if retry_count <= max_retries:
+                    if self.verbose:
+                        logger.warning(f"{error_type} failed, retrying in {retry_delay}s: {str(e)}")
+                    time.sleep(retry_delay)
+                else:
+                    if isinstance(e, requests.exceptions.RequestException):
+                        raise APIError(f"API request failed after retry: {str(e)}")
+                    else:
+                        raise APIError(f"Failed to parse API response after retry: {str(e)}")
 
     def _dict_to_item(self, item_dict: Dict[str, Any]) -> Item:
         """Convert a dictionary to an Item object."""
