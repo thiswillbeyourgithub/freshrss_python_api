@@ -26,7 +26,7 @@ from .utils.errors import APIError, AuthenticationError
 class FreshRSSAPI:
     """A Python client for the FreshRSS Fever API."""
 
-    VERSION: str = "2.0.0"
+    VERSION: str = "2.0.1"
 
     def __init__(
         self,
