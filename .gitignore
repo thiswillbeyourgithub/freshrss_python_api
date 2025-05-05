@@ -1,4 +1,6 @@
 .aider*
 __pycache__
-.env
+.env*
+tweaks*
+*author*
 freshrss_api.egg-info
