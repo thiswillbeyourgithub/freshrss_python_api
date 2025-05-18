@@ -27,7 +27,7 @@ setup(
     ],
     python_requires=">=3.9",
     install_requires=[
-        "requests >= 2.32.3",  # pdf with table support
+        "requests >= 2.32.3",
     ],
     extra_require={
         "dev": [
