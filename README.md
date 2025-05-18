@@ -16,6 +16,10 @@ A Python client for interacting with the FreshRSS Fever API. This library provid
 - **Environment Variables**: Configure the client using environment variables for easier integration with CI/CD pipelines and containerized environments.
 - **Verbose Logging**: Optional detailed logging of API requests and responses using Loguru.
 
+## Related Projects
+
+The author of this library also created [freshrss_to_karakeep](https://github.com/thiswillbeyourgithub/freshrss_to_karakeep), a Python script to periodically send FreshRSS "favourite" items to [Karakeep](https://github.com/karakeep-app/karakeep) (a bookmarking and read-it-later app).
+
 ## Installation
 
 You can install the FreshRSS API client via pip:
