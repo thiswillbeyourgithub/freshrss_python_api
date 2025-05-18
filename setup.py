@@ -28,6 +28,7 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "requests >= 2.32.3",
+        "beautifulsoup4 >= 4.13.4",
     ],
     extra_require={
         "dev": [
