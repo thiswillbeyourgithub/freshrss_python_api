@@ -143,7 +143,7 @@ client = FreshRSSAPI(verbose=True)
 
 This library interacts with the FreshRSS Fever API, which is a simplified API for mobile access and third-party integrations. The API endpoints are well-documented and provide access to most features of FreshRSS.
 
-For more details on the Fever API, refer to the [official documentation](https://freshrss.github.io/FreshRSS/en/developers/06_Fever_API.html).
+For more details on the Fever API, refer to the [official documentation](https://freshrss.github.io/FreshRSS/en/developers/06_Fever_API.html), as well as this [internet archive page](https://web.archive.org/web/20230616124016/feedafever.com/api).
 
 ## License
 
