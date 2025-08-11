@@ -45,6 +45,8 @@ These environment variables can be used instead of passing parameters directly t
 
 To start using the FreshRSS API client, initialize it with your FreshRSS instance URL, username, and API password.
 
+If you haven't done so already, enable API access to your instance in its config. More information [here](https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html) and [here](https://github.com/thiswillbeyourgithub/freshrss_python_api/issues/2#issuecomment-3172941542).
+
 ```python
 from freshrss_api import FreshRSSAPI
 
