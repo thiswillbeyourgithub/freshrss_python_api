@@ -1,14 +1,14 @@
 from datetime import datetime, timezone
 import hashlib
 import os
-import random
 import requests
 import time
 
-MINIMUM_VALID_TIMESTAMP = 946684800  # January 1, 2000 00:00:00 UTC
-from typing import Union, Optional, Dict, Any, Literal
+from typing import Union, Dict, Any, Literal
 from urllib.parse import urljoin
 from loguru import logger
+
+MINIMUM_VALID_TIMESTAMP = 946684800  # January 1, 2000 00:00:00 UTC
 
 try:
     from beartype import beartype as optional_typecheck
