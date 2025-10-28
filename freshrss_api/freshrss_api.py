@@ -231,17 +231,17 @@ class FreshRSSAPI:
         if as_ == "read":
             if not "read_item_ids" in resp:
                 logger.error(
-                    f"The response to set_mark does not contain 'read_item_ids'"
+                    f"The response to set_mark does not contain 'read_item_ids': '{resp}'"
                 )
         elif as_ == "saved":
             if not "saved_item_ids" in resp:
                 logger.error(
-                    f"The response to set_mark does not contain 'saved_item_ids'"
+                    f"The response to set_mark does not contain 'saved_item_ids': '{resp}'"
                 )
         elif as_ == "unsaved":
             if not "saved_item_ids" in resp:
                 logger.error(
-                    f"The response to set_mark does not contain 'saved_item_ids'"
+                    f"The response to set_mark does not contain 'saved_item_ids': '{resp}'"
                 )
 
         return resp
