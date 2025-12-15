@@ -1,8 +1,6 @@
 # FreshRSS Python API Client
 
 [![PyPI Version](https://img.shields.io/pypi/v/freshrss-api)](https://pypi.org/project/freshrss-api/)
-[![License](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
-
 A Python client for interacting with the FreshRSS Fever API. This library provides an easy-to-use interface for fetching items, marking items as read/saved/unsaved, and managing feeds and categories in your FreshRSS instance.
 
 ## Features
@@ -149,7 +147,7 @@ For more details on the Fever API, refer to the [official documentation](https:/
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 (GPLv3). See the [LICENSE](LICENSE) file for more details.
+This project is licensed. See [LICENSE](LICENSE) file for more details.
 
 ## Contributing
 
